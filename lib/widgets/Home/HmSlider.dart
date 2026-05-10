@@ -62,7 +62,7 @@ class _HmSliderState extends State<HmSlider> {
           width: double.infinity,
           height: 50,
           child: Text(
-            "搜索中...",
+            "搜索...",
             style: TextStyle(color: Colors.white, fontSize: 16),
           ),
         ),

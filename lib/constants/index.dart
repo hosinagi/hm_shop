@@ -8,5 +8,6 @@ class GlobalContants {
 
 // 存放请求地址接口的常量
 class HttpContants {
-  static const String BANNER_LIST = "/home/banner"; // 请求地址
+  static const String BANNER_LIST = "/home/banner"; // 轮播图请求地址
+  static const String CATEGORY_LIST = "/home/category/head"; // 分类请求地址
 }

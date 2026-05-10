@@ -15,7 +15,9 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  //函数列表封装轮播图图片数据
+  //分类数据列表
+  List<CategoryItem> _CategoryList = [];
+  //函数列表封装轮播图图片数据列表
   List<BannerItem> _BannerList = [
     // BannerItem(id: "1", imaUrl: "https://img95.699pic.com/photo/60030/5424.jpg_wh860.jpg"),
     // BannerItem(id: "2", imaUrl: "https://img95.699pic.com/photo/50120/1209.jpg_wh860.jpg"),
@@ -30,7 +32,7 @@ class _HomeViewState extends State<HomeView> {
       //需要间隔放SizeBox
       SliverToBoxAdapter(child: SizedBox(height: 10)),
       //SliverGridView和SliverListView都只能纵向滚动，不能横向
-      SliverToBoxAdapter(child: HmCategory()), //分类
+      SliverToBoxAdapter(child: HmCategory(categoryList: _CategoryList)), //分类
       SliverToBoxAdapter(child: SizedBox(height: 10)),
 
       SliverToBoxAdapter(child: HmSuggestion()), //推荐
@@ -54,14 +56,21 @@ class _HomeViewState extends State<HomeView> {
       HmMoreList()
     ];
   }
-
+  
+  //初始化状态
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _getBannerList();
+    _getCategoryList();
   }
-
+  //获取分类数据
+  void _getCategoryList() async {
+    _CategoryList = await getCategoryListAPI();
+    setState(() {});
+  }
+  //获取轮播图数据
   void _getBannerList() async {
     _BannerList = await getBannerListAPI();
     setState(() {});
