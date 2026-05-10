@@ -25,7 +25,7 @@ class _HmSliderState extends State<HmSlider> {
       carouselController: _controller, //绑定控制器
       items: List.generate(widget.BannerList.length, (int index) {
         return Image.network(
-          widget.BannerList[index].imaUrl,
+          widget.BannerList[index].imgUrl,
           fit: BoxFit.cover, //设置图片全覆盖
           width: screemWidth, //设置图片宽度
         );
@@ -86,7 +86,7 @@ class _HmSliderState extends State<HmSlider> {
             return GestureDetector(
               onTap: () {
                 //跳转，index是导航灯的index，因为已经绑定了页面，所以使用方法使页面跳转到点击触发的index
-                _controller.animateToPage(index);
+                _controller.animateToPage(index, duration: Duration(milliseconds: 300));
               },
               child: AnimatedContainer(
                 duration: Duration(milliseconds: 300),//设置动画效果过程为300毫秒

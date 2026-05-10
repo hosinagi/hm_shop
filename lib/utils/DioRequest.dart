@@ -1,0 +1,84 @@
+// 基于Dio进行二次封装
+import 'package:dio/dio.dart';
+import 'package:hm_shop/constants/index.dart';
+
+class DioRequest {
+  // 创建Dio对象，接下来的请求，拦截，设置全在这里面完成
+  final _dio = Dio();
+  // 在构造函数里写入基础地址，超时时间，拦截器
+  DioRequest() {
+    _dio.options.baseUrl = GlobalContants.BASE_URL; // 配置基础地址
+    _dio.options.connectTimeout = Duration(
+      seconds: GlobalContants.TIME_OUT,
+    ); // 请求超时
+    //_dio.options.sendTimeout = Duration(
+      //seconds: GlobalContants.TIME_OUT,
+    //); // 发送超时
+    _dio.options.receiveTimeout = Duration(
+      seconds: GlobalContants.TIME_OUT,
+    ); // 接收超时
+    //拦截器
+    _addInterceptor();
+  }
+
+  //添加拦截器
+  void _addInterceptor() {
+    // 这样就是定义拦截器的步骤
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        //响应拦截
+        onRequest: (request, handler) {
+          handler.next(request); //通过
+        },
+        //请求拦截
+        onResponse: (response, handler) {
+          //进行http状态码判断大于200且小于300则成功
+          //response.statusCode为http状态码，可能为空
+          if (response.statusCode! >= 200 && response.statusCode! <= 300) {
+            handler.next(response);
+            return;
+          }
+          //若不对则拦截。注意拦截的写法
+          handler.reject(DioException(requestOptions: response.requestOptions));
+        },
+        //错误拦截
+        onError: (error, handler) {
+          handler.reject(error); //有错误就拦截
+        },
+      ),
+    );
+  }
+
+  //定义一个get方法，请求地址
+  Future<dynamic> get(String url, {Map<String, dynamic>? params}) {
+    return _handleResponse(_dio.get(url, queryParameters: params));
+  }
+
+  // 进一步处理返回结果的函数，对数据的二次处理
+  Future<dynamic> _handleResponse(Future<Response<dynamic>> task) async {
+    try {
+      // Future是一个还未完成未来要完成的请求，所以task不是数据是一个请求
+      Response<dynamic> res = await task; // 得到数据
+      final data = res.data as Map<String, dynamic>; // 得到真实需要的接口返回的json数据
+      // 业务状态判断
+      if (data["code"] == GlobalContants.SUCCESS_CODE) {
+        // 这样才认定业务状态与http状态均正常，就可以正常放行
+        return data["result"]; //所有接口均只要result结果
+      }
+      // 判断为else则抛出异常
+      throw Exception(data["msg"] ?? "加载出现异常"); // ??空判断
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  // 最后用try/catch保证逻辑的正常执行，与python一样
+}
+
+// 创建对象,方便外部调用
+final DioRequest dioRequest = DioRequest(); // 单例对象
+
+
+// dio请求工具发送请求，返回的数据类型却是Response<dynamic>，需要的数据存在Response<dynamic>.data中
+// 为了不用每次获取数据都需要data，所有要把所有的接口解放出来，也就是解构或者对数据的二次处理
+// 这样就可以拿到真正的数据，再判断请求是否成功，状态码是否为1

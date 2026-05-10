@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hm_shop/api/home.dart';
 import 'package:hm_shop/viewmodels/home.dart';
 import 'package:hm_shop/widgets/Home/HmCategory.dart';
 import 'package:hm_shop/widgets/Home/HmHot.dart';
@@ -15,10 +16,10 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   //函数列表封装轮播图图片数据
-  final List<BannerItem> _BannerList = [
-    BannerItem(id: "1", imaUrl: "https://img95.699pic.com/photo/60030/5424.jpg_wh860.jpg"),
-    BannerItem(id: "2", imaUrl: "https://img95.699pic.com/photo/50120/1209.jpg_wh860.jpg"),
-    BannerItem(id: "3", imaUrl: "https://img95.699pic.com/photo/50478/8568.jpg_wh860.jpg")
+  List<BannerItem> _BannerList = [
+    // BannerItem(id: "1", imaUrl: "https://img95.699pic.com/photo/60030/5424.jpg_wh860.jpg"),
+    // BannerItem(id: "2", imaUrl: "https://img95.699pic.com/photo/50120/1209.jpg_wh860.jpg"),
+    // BannerItem(id: "3", imaUrl: "https://img95.699pic.com/photo/50478/8568.jpg_wh860.jpg")
   ];
 
   //函数封装CustomScrollView内容
@@ -52,6 +53,18 @@ class _HomeViewState extends State<HomeView> {
       //无限滚动利用SliverGridView就可以实现
       HmMoreList()
     ];
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _getBannerList();
+  }
+
+  void _getBannerList() async {
+    _BannerList = await getBannerListAPI();
+    setState(() {});
   }
 
   @override
