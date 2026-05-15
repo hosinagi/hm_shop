@@ -21,3 +21,11 @@ Future<List<CategoryItem>> getCategoryListAPI() async {
   }).toList();
   return tt;
 }
+
+// 优惠推荐 - 结果
+Future<SpecialRecommendResult> getSpecialRecommendListAPI() async {
+  // 返回请求
+  return SpecialRecommendResult.formJSON(
+    await dioRequest.get(HttpContants.PRODUCT_LIST),
+  );
+}

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// 轮播图数据模型
 class BannerItem {
   String id;
   String imgUrl;
@@ -16,66 +17,8 @@ class BannerItem {
 // 从接口那拿到的数据，要转化成BannerItem能用的数据就必须转化
 // Flutter中没有隐式转化，只能强制转化
 
-//  {
-//             "id": "1181622001",
-//             "name": "气质女装",
-//             "picture": "https://yjy-teach-oss.oss-cn-beijing.aliyuncs.com/meikou/c1/qznz.png",
-//             "children": [
-//                 {
-//                     "id": "1191110001",
-//                     "name": "半裙",
-//                     "picture": "https://yjy-teach-oss.oss-cn-beijing.aliyuncs.com/meikou/c2/qznz_bq.png?quality=95&imageView",
-//                     "children": null,
-//                     "goods": null
-//                 },
-//                 {
-//                     "id": "1191110002",
-//                     "name": "衬衫",
-//                     "picture": "https://yjy-teach-oss.oss-cn-beijing.aliyuncs.com/meikou/c2/qznz_cs.png?quality=95&imageView",
-//                     "children": null,
-//                     "goods": null
-//                 },
-//                 {
-//                     "id": "1191110022",
-//                     "name": "T恤",
-//                     "picture": "https://yjy-teach-oss.oss-cn-beijing.aliyuncs.com/meikou/c2/qznz_tx.png?quality=95&imageView",
-//                     "children": null,
-//                     "goods": null
-//                 },
-//                 {
-//                     "id": "1191110023",
-//                     "name": "针织衫",
-//                     "picture": "https://yjy-teach-oss.oss-cn-beijing.aliyuncs.com/meikou/c2/qznz_zzs.png?quality=95&imageView",
-//                     "children": null,
-//                     "goods": null
-//                 },
-//                 {
-//                     "id": "1191110024",
-//                     "name": "夹克",
-//                     "picture": "https://yjy-teach-oss.oss-cn-beijing.aliyuncs.com/meikou/c2/qznz_jk.png?quality=95&imageView",
-//                     "children": null,
-//                     "goods": null
-//                 },
-//                 {
-//                     "id": "1191110025",
-//                     "name": "卫衣",
-//                     "picture": "https://yjy-teach-oss.oss-cn-beijing.aliyuncs.com/meikou/c2/qznz_wy.png?quality=95&imageView",
-//                     "children": null,
-//                     "goods": null
-//                 },
-//                 {
-//                     "id": "1191110028",
-//                     "name": "背心",
-//                     "picture": "https://yjy-teach-oss.oss-cn-beijing.aliyuncs.com/meikou/c2/qznz_bx.png?quality=95&imageView",
-//                     "children": null,
-//                     "goods": null
-//                 }
-//             ],
-//             "goods": null
-//         }
-
 //根据json数据，编写class对象和工厂函数
-// 分类对象
+// 分类数据模型
 class CategoryItem {
   String id;
   String name;
@@ -94,13 +37,107 @@ class CategoryItem {
       id: json["id"] ?? "",
       name: json["name"] ?? "",
       picture: json["picture"] ?? "",
-      children: json["children"] == null
+      children: json["children"] == null // 语法:表达式（布尔值）？结果1：结果2；布尔值为true则输出前项，为false则输出后项。
           ? null
           : (json["children"] as List)
                 .map(
                   (item) => CategoryItem.formJSON(item as Map<String, dynamic>),
                 )
                 .toList()
+    );
+  }
+}
+
+// 推荐数据模型
+// 特惠推荐 - 商品项
+class GoodsItem {
+  String id;
+  String name;
+  String? desc;
+  String price;
+  String picture;
+  int orderNum;
+  GoodsItem({
+    required this.id,
+    required this.name,
+    this.desc,
+    required this.price,
+    required this.picture,
+    required this.orderNum,
+  });
+  factory GoodsItem.formJSON(Map<String, dynamic> json) {
+    return GoodsItem(
+      id: json["id"]?.toString() ?? "",
+      name: json["name"]?.toString() ?? "",
+      desc: json["desc"]?.toString(),
+      price: json["price"]?.toString() ?? "",
+      picture: json["picture"]?.toString() ?? "",
+      orderNum: int.tryParse(json["orderNum"]?.toString() ?? "0") ?? 0,
+    );
+  }
+}
+
+// 特惠推荐 - 商品分页信息
+class GoodsItems {
+  int counts;
+  int pageSize;
+  int pages;
+  int page;
+  List<GoodsItem> items;
+  GoodsItems({
+    required this.counts,
+    required this.pageSize,
+    required this.pages,
+    required this.page,
+    required this.items,
+  });
+  factory GoodsItems.formJSON(Map<String, dynamic> json) {
+    return GoodsItems(
+      counts: int.tryParse(json["counts"]?.toString() ?? "0") ?? 0,
+      pageSize: int.tryParse(json["pageSize"]?.toString() ?? "0") ?? 0,
+      pages: int.tryParse(json["pages"]?.toString() ?? "0") ?? 0,
+      page: int.tryParse(json["page"]?.toString() ?? "0") ?? 0,
+      items: (json["items"] as List? ?? [])
+          .map((item) => GoodsItem.formJSON(item as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
+// 特惠推荐 - 子类型
+class SubType {
+  String id;
+  String title;
+  GoodsItems goodsItems;
+  SubType({required this.id, required this.title, required this.goodsItems});
+  factory SubType.formJSON(Map<String, dynamic> json) {
+    return SubType(
+      id: json["id"]?.toString() ?? "",
+      title: json["title"]?.toString() ?? "",
+      goodsItems: GoodsItems.formJSON(
+        json["goodsItems"] as Map<String, dynamic>,
+      ),
+    );
+  }
+}
+
+// 特惠推荐 - 结果
+class SpecialRecommendResult {
+  String id;
+  String title;
+  List<SubType> subTypes;
+  SpecialRecommendResult({
+    required this.id,
+    required this.title,
+    required this.subTypes,
+  });
+  factory SpecialRecommendResult.formJSON(Map<String, dynamic> json) {
+    return SpecialRecommendResult(
+      id: json["id"]?.toString() ?? "",
+      title: json["title"]?.toString() ?? "",
+      subTypes: (json["subTypes"] as List? ?? [])
+          .map((item) => SubType.formJSON(item as Map<String, dynamic>))
+          .toList(),
     );
   }
 }

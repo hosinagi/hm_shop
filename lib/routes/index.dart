@@ -6,8 +6,8 @@ import 'package:hm_shop/pages/Main/index.dart';
 Widget getRouteWidget() {
   return MaterialApp(
 //命名路由
-    initialRoute: "/",
-    routes: getRootRoutes(),
+    initialRoute: "/", // 设置主页
+    routes: getRootRoutes(), // 路由表
   );
 }
 

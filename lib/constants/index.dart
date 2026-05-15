@@ -10,4 +10,5 @@ class GlobalContants {
 class HttpContants {
   static const String BANNER_LIST = "/home/banner"; // 轮播图请求地址
   static const String CATEGORY_LIST = "/home/category/head"; // 分类请求地址
+  static const String PRODUCT_LIST = "/hot/preference"; // 特惠推荐请求地址
 }
