@@ -29,6 +29,18 @@ class _HomeViewState extends State<HomeView> {
     // BannerItem(id: "2", imaUrl: "https://img95.699pic.com/photo/50120/1209.jpg_wh860.jpg"),
     // BannerItem(id: "3", imaUrl: "https://img95.699pic.com/photo/50478/8568.jpg_wh860.jpg")
   ];
+  //热榜推荐数据列表
+  SpecialRecommendResult _inVogueResult = SpecialRecommendResult(
+    id: "",
+    title: "",
+    subTypes: [],
+  );
+  //一战式买全数据列表
+  SpecialRecommendResult _oneStopResult = SpecialRecommendResult(
+    id: "",
+    title: "",
+    subTypes: [],
+  );
 
   //函数封装CustomScrollView内容
   List<Widget> _getScrollchildren() {
@@ -50,9 +62,9 @@ class _HomeViewState extends State<HomeView> {
           child: Flex(
             direction: Axis.horizontal,
             children: [
-              Expanded(child: HmHot()),
+              Expanded(child: HmHot(result: _inVogueResult, type: "hot")),
               SizedBox(width: 10),
-              Expanded(child: HmHot()),
+              Expanded(child: HmHot(result: _oneStopResult, type: "step")),
             ],
           ),
         ),
@@ -71,6 +83,8 @@ class _HomeViewState extends State<HomeView> {
     _getBannerList();
     _getCategoryList();
     _getSpecialRecommendList();
+    _getInVogueList();
+    _getOneStopList();
   }
   //获取分类数据
   void _getCategoryList() async {
@@ -85,6 +99,16 @@ class _HomeViewState extends State<HomeView> {
   //获取优惠推荐数据
   void _getSpecialRecommendList() async {
     _SpecialRecommendList = await getSpecialRecommendListAPI();
+    setState(() {});
+  }
+  //获取热榜推荐数据
+  void _getInVogueList() async {
+    _inVogueResult = await getInVogueListAPI();
+    setState(() {});
+  }
+  //获取一战式买全数据
+  void _getOneStopList() async {
+    _oneStopResult = await getOneStopListAPI();
     setState(() {});
   }
 
