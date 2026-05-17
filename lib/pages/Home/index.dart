@@ -41,6 +41,8 @@ class _HomeViewState extends State<HomeView> {
     title: "",
     subTypes: [],
   );
+  //推荐列表数据列表
+  List<GoodDetailItem> _recommendList = [];
 
   //函数封装CustomScrollView内容
   List<Widget> _getScrollchildren() {
@@ -71,7 +73,7 @@ class _HomeViewState extends State<HomeView> {
       ),
       SliverToBoxAdapter(child: SizedBox(height: 10)),
       //无限滚动利用SliverGridView就可以实现
-      HmMoreList()
+      HmMoreList(recommendList: _recommendList),
     ];
   }
   
@@ -85,6 +87,7 @@ class _HomeViewState extends State<HomeView> {
     _getSpecialRecommendList();
     _getInVogueList();
     _getOneStopList();
+    _getRecommendList();
   }
   //获取分类数据
   void _getCategoryList() async {
@@ -109,6 +112,11 @@ class _HomeViewState extends State<HomeView> {
   //获取一战式买全数据
   void _getOneStopList() async {
     _oneStopResult = await getOneStopListAPI();
+    setState(() {});
+  }
+  //获取推荐列表数据
+  void _getRecommendList() async {
+    _recommendList = await getRecommendListAPI({"limit": 30});
     setState(() {});
   }
 
