@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hm_shop/api/home.dart';
+import 'package:hm_shop/utils/Toastutils.dart';
 import 'package:hm_shop/viewmodels/home.dart';
 import 'package:hm_shop/widgets/Home/HmCategory.dart';
 import 'package:hm_shop/widgets/Home/HmHot.dart';
@@ -88,41 +89,48 @@ class _HomeViewState extends State<HomeView> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _getBannerList();
-    _getCategoryList();
-    _getSpecialRecommendList();
-    _getInVogueList();
-    _getOneStopList();
-    _getRecommendList();
+    // _getBannerList();
+    // _getCategoryList();
+    // _getSpecialRecommendList();
+    // _getInVogueList();
+    // _getOneStopList();
+    // _getRecommendList();
     _registerEvent();
+    Future.microtask(() {
+      // 使用key操纵函数
+      _key.currentState?.show();
+    });
   }
+  // 由于initState -> build -> 下拉刷新组件 -> 才可以操作它
+  // 所以不能直接使用，因为在build阶段这个函数还未构建完成执行没有结果
+  // 需要使用Future.micoTask微任务使其异步完成
 
   //获取分类数据
-  void _getCategoryList() async {
+  Future<void> _getCategoryList() async {
     _CategoryList = await getCategoryListAPI();
     setState(() {});
   }
 
   //获取轮播图数据
-  void _getBannerList() async {
+  Future<void> _getBannerList() async {
     _BannerList = await getBannerListAPI();
     setState(() {});
   }
 
   //获取优惠推荐数据
-  void _getSpecialRecommendList() async {
+  Future<void> _getSpecialRecommendList() async {
     _SpecialRecommendList = await getSpecialRecommendListAPI();
     setState(() {});
   }
 
   //获取热榜推荐数据
-  void _getInVogueList() async {
+  Future<void> _getInVogueList() async {
     _inVogueResult = await getInVogueListAPI();
     setState(() {});
   }
 
   //获取一战式买全数据
-  void _getOneStopList() async {
+  Future<void> _getOneStopList() async {
     _oneStopResult = await getOneStopListAPI();
     setState(() {});
   }
@@ -132,7 +140,7 @@ class _HomeViewState extends State<HomeView> {
   bool _isLoading = false; // 当前请求状态
   bool _hasMore = true; // 是否还有下一页
 
-  void _getRecommendList() async {
+  Future<void> _getRecommendList() async {
     // 当正在请求状态或者没有下一页时，放弃请求
     if (_isLoading == true || _hasMore == false) {
       return;
@@ -168,11 +176,38 @@ class _HomeViewState extends State<HomeView> {
 
   final ScrollController _controller = ScrollController(); // 划动监听控制器
 
+  // 封装onRefresh函数，实现下拉重置数据
+  Future<void> _onRefresh() async {
+    // 参数回归
+    _page = 1;
+    bool _isLoading = false;
+    bool _hasMore = true;
+    // 重新获取数据
+    await _getBannerList();
+    await _getCategoryList();
+    await _getSpecialRecommendList();
+    await _getInVogueList();
+    await _getOneStopList();
+    await _getRecommendList();
+    // 数据获取成功，显示提示消息
+    Toastutils.showToast(context, "刷新成功");
+  }
+
+  // Globalkey是一个方法可以创建一个key绑定到Widget部件上，可以操作widget部件
+  final GlobalKey<RefreshIndicatorState> _key =
+      GlobalKey<RefreshIndicatorState>();
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      controller: _controller, // 给无限滚动绑定控制器
-      slivers: _getScrollchildren(),
-    ); //只允许Sliver家族内容
+    // 用RefreshIndicator包裹子组件，使其可以下拉
+    return RefreshIndicator(
+      key: _key, // 绑定key
+      // 这个onRefresh需要返回一个异步函数
+      onRefresh: _onRefresh,
+      child: CustomScrollView(
+        controller: _controller, // 给无限滚动绑定控制器
+        slivers: _getScrollchildren(),
+      ),
+    );
+    //只允许Sliver家族内容
   }
 }
