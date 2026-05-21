@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hm_shop/api/mine.dart';
+import 'package:hm_shop/viewmodels/home.dart';
+import 'package:hm_shop/widgets/Home/HmMoreList.dart';
+import 'package:hm_shop/widgets/Mine/HmGuess.dart';
 
 class MineView extends StatefulWidget {
   MineView({Key? key}) : super(key: key);
@@ -8,8 +12,253 @@ class MineView extends StatefulWidget {
 }
 
 class _MineViewState extends State<MineView> {
+  Widget _buildHeader() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [const Color(0xFFFFF2E8), const Color(0xFFFDF6F1)],
+        ),
+      ),
+      padding: const EdgeInsets.only(left: 20, right: 40, top: 80, bottom: 20),
+      child: Row(
+        // children: [
+        //   Obx(() {
+        //     return CircleAvatar(
+        //       radius: 26,
+        //       backgroundImage: _userController.user.value.avatar.isNotEmpty
+        //           ? NetworkImage(_userController.user.value.avatar)
+        //           : AssetImage('lib/assets/goods_avatar.png'),
+        //       backgroundColor: Colors.white,
+        //     );
+        //   }),
+        //   const SizedBox(width: 12),
+        //   Expanded(
+        //     child: Column(
+        //       crossAxisAlignment: CrossAxisAlignment.start,
+        //       children: [
+        //         Obx(() {
+        //           // Obx中必须得有可监测的响应式数据
+        //           return GestureDetector(
+        //             onTap: () {
+        //               if (_userController.user.value.id.isEmpty) {
+        //                 // 当没有用户信息的时候可以去登录
+        //                 Navigator.pushNamed(context, "/login");
+        //               }
+        //             },
+        //             child: Text(
+        //               _userController.user.value.id.isNotEmpty
+        //                   ? _userController.user.value.account
+        //                   : '立即登录', // 有登录信息 显示用户信息 否则显示立即登录
+        //               style: TextStyle(
+        //                 fontSize: 18,
+        //                 fontWeight: FontWeight.w600,
+        //               ),
+        //             ),
+        //           );
+        //         }),
+        //       ],
+        //     ),
+        //   ),
+        //   Obx(() => _getLogout()),
+        // ],
+      ),
+    );
+  }
+
+  Widget _buildVipCard() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 239, 197, 153),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(10),
+            topRight: Radius.circular(10),
+          ),
+        ),
+        child: Row(
+          children: [
+            Image.asset("lib/assets/ic_user_vip.png", width: 30, height: 30),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                '升级美荟商城会员，尊享无限免邮',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color.fromRGBO(128, 44, 26, 1),
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {},
+              style: TextButton.styleFrom(
+                backgroundColor: const Color.fromRGBO(126, 43, 26, 1),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+              ),
+              child: const Text('立即开通', style: TextStyle(fontSize: 12)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickActions() {
+    Widget item(String pic, String label) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset(pic, width: 30, height: 30, fit: BoxFit.cover),
+          const SizedBox(height: 6),
+          Text(label, style: const TextStyle(fontSize: 12)),
+        ],
+      );
+    }
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            item("lib/assets/ic_user_collect.png", '我的收藏'),
+            item("lib/assets/ic_user_history.png", '我的足迹'),
+            item("lib/assets/ic_user_unevaluated.png", '我的客服'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOrderModule() {
+    Widget orderItem(String pic, String label) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset(pic, width: 30, height: 30, fit: BoxFit.cover),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 12, color: Colors.black),
+          ),
+        ],
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 2,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+          ),
+
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '我的订单',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  orderItem("lib/assets/ic_user_order.png", '全部订单'),
+                  orderItem("lib/assets/ic_user_obligation.png", '待付款'),
+                  orderItem("lib/assets/ic_user_unreceived.png", '待发货'),
+                  orderItem("lib/assets/ic_user_unshipped.png", '待收货'),
+                  orderItem("lib/assets/ic_user_unevaluated.png", '待评价'),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  // 创建用于接收API转换数据的列表
+  List<GoodDetailItem> _list = [];
+  // 无限列表的请求参数,接口自带的
+  Map<String, dynamic> _params = {"page": 1, "pageSize": 10};
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _getGuessList();
+    _registerEvent();
+  }
+  
+  // 滚动距离判断
+  void _registerEvent() {
+    // 滚动触发
+    _controller.addListener(() {
+      // 滚动逻辑
+      if (_controller.position.pixels >=
+          (_controller.position.maxScrollExtent - 50)) {
+        // 滚动到底触发请求
+        _getGuessList();
+      }
+    });
+  }
+
+  // 阀门控制
+  bool _isLoading = false; // 是否有人正在加载
+  bool _harMore = true; // 是否还有下一页
+  void _getGuessList() async {
+    if (_isLoading == true || _harMore == false) {
+      // 有人正在加载或者没有下一页就不请求了
+      return;
+    }
+    _isLoading = true; // 占住位置
+    final res = await getGuessListAPI(_params);
+    _isLoading = false; // 解放位置
+    _list.addAll(res.items); // 把内容追加到尾部
+    // _list = res.items; // 这里不能赋值
+    setState(() {});
+    // 这个接口里有一个参数pages，res.pages表示数据一共有多少页
+    // 当请求的页面数大于等于总页面数就表示没有下一页
+    if (_params["page"] >= res.pages) {
+      _harMore = false;
+      return;
+    }
+    _params["page"]++; // 针对页码进行++
+  }
+  
+  // 滚动容器控制器
+  final ScrollController _controller = ScrollController();
+
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text("我的"));
+    return CustomScrollView(
+      // 无限列表绑定控制器
+      controller: _controller,
+      slivers: [
+        SliverToBoxAdapter(child: _buildHeader()),
+        SliverToBoxAdapter(child: _buildVipCard()),
+        SliverToBoxAdapter(child: _buildQuickActions()),
+        SliverToBoxAdapter(child: _buildOrderModule()),
+        // pinned 表示吸住的意思
+        SliverPersistentHeader(delegate: HmGuess(), pinned: true),
+        // 猜你喜欢
+        HmMoreList(recommendList: _list), // 上拉加载
+      ],
+    );
   }
 }
