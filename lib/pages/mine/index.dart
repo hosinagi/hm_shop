@@ -22,47 +22,36 @@ class _MineViewState extends State<MineView> {
         ),
       ),
       padding: const EdgeInsets.only(left: 20, right: 40, top: 80, bottom: 20),
+      // 登录头像设置
       child: Row(
-        // children: [
-        //   Obx(() {
-        //     return CircleAvatar(
-        //       radius: 26,
-        //       backgroundImage: _userController.user.value.avatar.isNotEmpty
-        //           ? NetworkImage(_userController.user.value.avatar)
-        //           : AssetImage('lib/assets/goods_avatar.png'),
-        //       backgroundColor: Colors.white,
-        //     );
-        //   }),
-        //   const SizedBox(width: 12),
-        //   Expanded(
-        //     child: Column(
-        //       crossAxisAlignment: CrossAxisAlignment.start,
-        //       children: [
-        //         Obx(() {
-        //           // Obx中必须得有可监测的响应式数据
-        //           return GestureDetector(
-        //             onTap: () {
-        //               if (_userController.user.value.id.isEmpty) {
-        //                 // 当没有用户信息的时候可以去登录
-        //                 Navigator.pushNamed(context, "/login");
-        //               }
-        //             },
-        //             child: Text(
-        //               _userController.user.value.id.isNotEmpty
-        //                   ? _userController.user.value.account
-        //                   : '立即登录', // 有登录信息 显示用户信息 否则显示立即登录
-        //               style: TextStyle(
-        //                 fontSize: 18,
-        //                 fontWeight: FontWeight.w600,
-        //               ),
-        //             ),
-        //           );
-        //         }),
-        //       ],
-        //     ),
-        //   ),
-        //   Obx(() => _getLogout()),
-        // ],
+        children: [
+          // 用于展示圆形图片
+          CircleAvatar(
+            radius: 26, // 半径
+            backgroundImage: const AssetImage('lib/assets/goods_avatar.png'),
+            backgroundColor: Colors.white, // 底色
+          ),
+          const SizedBox(width: 12),
+          // 让子组件占满空间
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 设置按钮
+                GestureDetector(
+                  onTap: () {
+                    // 跳转到登录页面
+                    Navigator.pushNamed(context, "/login");
+                  },
+                  child: Text(
+                    "立即登录",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -193,6 +182,7 @@ class _MineViewState extends State<MineView> {
       ),
     );
   }
+
   // 创建用于接收API转换数据的列表
   List<GoodDetailItem> _list = [];
   // 无限列表的请求参数,接口自带的
@@ -204,7 +194,7 @@ class _MineViewState extends State<MineView> {
     _getGuessList();
     _registerEvent();
   }
-  
+
   // 滚动距离判断
   void _registerEvent() {
     // 滚动触发
@@ -240,7 +230,7 @@ class _MineViewState extends State<MineView> {
     }
     _params["page"]++; // 针对页码进行++
   }
-  
+
   // 滚动容器控制器
   final ScrollController _controller = ScrollController();
 
