@@ -1,4 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:hm_shop/api/user.dart';
 import 'package:hm_shop/utils/ToastUtils.dart';
 
 class LoginPage extends StatefulWidget {
@@ -67,6 +69,24 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+  
+  // 定义登录跳转函数
+  _login() async{
+    // 调用登录接口
+    try {
+      final res = await loginAPI({
+        "account": _phonController.text,
+        "password": _codeController.text,
+      });
+      //print(res); // 打印用户信息
+      Toastutils.showToast(context, "登录成功"); // 提示登录成功信息
+      Navigator.pop(context); // 返回上个页面
+    } catch (e) {
+      // 这一步做了很多操作，非常难，主要针对一层一层的异常抛出问题，异常抛出的信息问题
+      // 对上几步的异常抛出信息不进行处理，保留原有信息
+      Toastutils.showToast(context, (e as DioException).message);// 提示登录失败信息
+    }
+  }
 
   // 登录按钮Widget
   Widget _buildLoginButton() {
@@ -80,6 +100,7 @@ class _LoginPageState extends State<LoginPage> {
             // 进行勾选框的判断
             if(_isChecked == true) {
               // 校验通过
+              _login();
             }else{
               // 提示勾选用户协议
               Toastutils.showToast(context, "请勾选用户协议");

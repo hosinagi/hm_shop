@@ -15,4 +15,5 @@ class HttpContants {
   static const String ONE_STOP_LIST = "/hot/oneStop"; // 一战式买全请求地址
   static const String RECOMMEND_LIST = "/home/recommend"; // 推荐列表请求地址
   static const String GUESS_LIST = "/home/goods/guessLike"; // 猜你喜欢请求地址
+  static const String LOGIN = "/login"; // 登录接口地址
 }

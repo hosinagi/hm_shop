@@ -43,15 +43,23 @@ class DioRequest {
         },
         //错误拦截
         onError: (error, handler) {
-          handler.reject(error); //有错误就拦截
+          // handler.reject(error); //有错误就拦截
+          // 原来的异常抛出没有携带信息，改变方法使其能携带信息
+          handler.reject(DioException(requestOptions: error.requestOptions,
+          message: error.response?.data["msg"] ?? " "));
         },
       ),
     );
   }
 
-  //定义一个get方法，请求地址
+  // 定义一个get方法，请求数据
   Future<dynamic> get(String url, {Map<String, dynamic>? params}) {
     return _handleResponse(_dio.get(url, queryParameters: params));
+  }
+
+  // 定义一个post方法
+  Future<dynamic> post(String url, {Map<String, dynamic>? data}) {
+    return _handleResponse(_dio.post(url, data: data));
   }
 
   // 进一步处理返回结果的函数，对数据的二次处理
@@ -66,9 +74,12 @@ class DioRequest {
         return data["result"]; //所有接口均只要result结果
       }
       // 判断为else则抛出异常
-      throw Exception(data["msg"] ?? "加载出现异常"); // ??空判断
+      // throw Exception(data["msg"] ?? "加载出现异常"); // ??空判断
+      throw DioException(requestOptions: res.requestOptions,
+      message: data["msg"] ?? "数据加载异常");
     } catch (e) {
-      throw Exception(e);
+      // throw Exception(e);用这个方法会覆盖掉信息
+      rethrow;  // 不改变原来抛出异常的类型
     }
   }
 
