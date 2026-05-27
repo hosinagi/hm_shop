@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:get/state_manager.dart';
 import 'package:hm_shop/api/mine.dart';
 import 'package:hm_shop/viewmodels/home.dart';
 import 'package:hm_shop/widgets/Home/HmMoreList.dart';
 import 'package:hm_shop/widgets/Mine/HmGuess.dart';
+import 'package:hm_shop/stores/UserController.dart';
 
 class MineView extends StatefulWidget {
   MineView({Key? key}) : super(key: key);
@@ -12,6 +16,9 @@ class MineView extends StatefulWidget {
 }
 
 class _MineViewState extends State<MineView> {
+  // 无论有几个页面，先把这个共享数据put在这里，谁都可以拿
+  final Usercontroller _userController = Get.put(Usercontroller());
+
   Widget _buildHeader() {
     return Container(
       decoration: BoxDecoration(
@@ -25,29 +32,46 @@ class _MineViewState extends State<MineView> {
       // 登录头像设置
       child: Row(
         children: [
-          // 用于展示圆形图片
-          CircleAvatar(
-            radius: 26, // 半径
-            backgroundImage: const AssetImage('lib/assets/goods_avatar.png'),
-            backgroundColor: Colors.white, // 底色
-          ),
+          Obx(() {
+            return CircleAvatar(
+              // 用于展示圆形图片
+              radius: 26, // 半径
+              backgroundImage: _userController.user.value.avatar.isNotEmpty
+                  ? NetworkImage(_userController.user.value.avatar)
+                  : AssetImage("lib/assets/goods_avatar.png"),
+              backgroundColor: Colors.white, // 底色
+            );
+          }),
           const SizedBox(width: 12),
           // 让子组件占满空间
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 设置按钮
-                GestureDetector(
-                  onTap: () {
-                    // 跳转到登录页面
-                    Navigator.pushNamed(context, "/login");
-                  },
-                  child: Text(
-                    "立即登录",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-                ),
+                Obx(() {
+                  // Obx中必须要有可检测的响应式数据，否则会报错
+                  return GestureDetector(
+                    // 设置按钮
+                    onTap: () {
+                      // 当用户登录信息为空时才可以进行登录
+                      if (_userController.user.value.id.isEmpty) {
+                        // 跳转到登录页面
+                        Navigator.pushNamed(context, "/login");
+                      }
+                    },
+                    child: Text(
+                      // 有登录则显示用户信息，无登录则显示立即登录
+                      // 用三元表达式判断用户是否登录，是则显示id
+                      _userController.user.value.id.isNotEmpty
+                          ? _userController.user.value.id
+                          : "立即登录",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  );
+                }),
               ],
             ),
           ),

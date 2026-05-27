@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hm_shop/api/user.dart';
 import 'package:hm_shop/utils/ToastUtils.dart';
+import 'package:hm_shop/stores/UserController.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key? key}) : super(key: key);
@@ -13,6 +15,8 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   TextEditingController _phonController = TextEditingController(); // 账号控制器
   TextEditingController _codeController = TextEditingController(); // 密码控制器
+  final Usercontroller _userController = Get.find(); // 寻找对象
+
   // 用户账号Widget
   Widget _buildPhoneTextField() {
     return TextFormField(
@@ -75,10 +79,11 @@ class _LoginPageState extends State<LoginPage> {
     // 调用登录接口
     try {
       final res = await loginAPI({
-        "account": _phonController.text,
-        "password": _codeController.text,
+        "account": _phonController.text, // 控制器获取数据的账号文本部分
+        "password": _codeController.text, // 密码文本部分
       });
       //print(res); // 打印用户信息
+      _userController.updateUserInfo(res);
       Toastutils.showToast(context, "登录成功"); // 提示登录成功信息
       Navigator.pop(context); // 返回上个页面
     } catch (e) {
