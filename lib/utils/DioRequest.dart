@@ -1,6 +1,7 @@
 // 基于Dio进行二次封装
 import 'package:dio/dio.dart';
 import 'package:hm_shop/constants/index.dart';
+import 'package:hm_shop/stores/TokenManager.dart';
 
 class DioRequest {
   // 创建Dio对象，接下来的请求，拦截，设置全在这里面完成
@@ -28,6 +29,14 @@ class DioRequest {
       InterceptorsWrapper(
         //响应拦截
         onRequest: (request, handler) {
+          // 一般在这里注入token，用gettoken工具获取磁盘上的数据
+          // 判断磁盘中有数据才进行获取操作
+          if(tokenManager.getToken().isNotEmpty) {
+            // 一般使用request中的headers Authorazation Bearer token来获取token，这种是企业公式的写法
+            request.headers = {
+              "Authorization": "Bearer ${tokenManager.getToken()}" 
+            };
+          }
           handler.next(request); //通过
         },
         //请求拦截

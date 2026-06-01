@@ -4,6 +4,7 @@ class GlobalContants {
   static const String BASE_URL = "https://meikou-api.itheima.net"; // 基础地址
   static const int TIME_OUT = 10; // 超时时间
   static const String SUCCESS_CODE = "1"; // 业务状态/成功状态
+  static const String TOKEN_KEY = "hm_shop_token"; // token对应持久化的key
 }
 
 // 存放请求地址接口的常量
@@ -16,4 +17,5 @@ class HttpContants {
   static const String RECOMMEND_LIST = "/home/recommend"; // 推荐列表请求地址
   static const String GUESS_LIST = "/home/goods/guessLike"; // 猜你喜欢请求地址
   static const String LOGIN = "/login"; // 登录接口地址
+  static const String USER_PROFILE = "/member/profile"; // 用户信息接口地址
 }

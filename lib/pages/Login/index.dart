@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hm_shop/api/user.dart';
+import 'package:hm_shop/stores/TokenManager.dart';
 import 'package:hm_shop/utils/ToastUtils.dart';
 import 'package:hm_shop/stores/UserController.dart';
 
@@ -82,7 +83,9 @@ class _LoginPageState extends State<LoginPage> {
         "account": _phonController.text, // 控制器获取数据的账号文本部分
         "password": _codeController.text, // 密码文本部分
       });
-      //print(res); // 打印用户信息
+      // res // res就是用户信息合集
+      // 登录成功后写入持久化
+      tokenManager.setToken(res.token);
       _userController.updateUserInfo(res);
       Toastutils.showToast(context, "登录成功"); // 提示登录成功信息
       Navigator.pop(context); // 返回上个页面

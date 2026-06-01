@@ -17,7 +17,7 @@ class MineView extends StatefulWidget {
 
 class _MineViewState extends State<MineView> {
   // 无论有几个页面，先把这个共享数据put在这里，谁都可以拿
-  final Usercontroller _userController = Get.put(Usercontroller());
+  final Usercontroller _userController = Get.find();
 
   Widget _buildHeader() {
     return Container(
