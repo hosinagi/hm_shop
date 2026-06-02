@@ -3,7 +3,9 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/state_manager.dart';
 import 'package:hm_shop/api/mine.dart';
+import 'package:hm_shop/stores/TokenManager.dart';
 import 'package:hm_shop/viewmodels/home.dart';
+import 'package:hm_shop/viewmodels/user.dart';
 import 'package:hm_shop/widgets/Home/HmMoreList.dart';
 import 'package:hm_shop/widgets/Mine/HmGuess.dart';
 import 'package:hm_shop/stores/UserController.dart';
@@ -18,6 +20,43 @@ class MineView extends StatefulWidget {
 class _MineViewState extends State<MineView> {
   // 无论有几个页面，先把这个共享数据put在这里，谁都可以拿
   final Usercontroller _userController = Get.find();
+
+  // 返回退出登录方法
+  Widget _getLogin() {
+    return _userController.user.value.id.isNotEmpty
+        ? Expanded(
+            child: GestureDetector(
+              onTap: () {
+                // 点击退出登录，弹出确认弹窗
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    // 这里必须返回Dialog基础类
+                    return AlertDialog(
+                      title: Text("提示"), // 标题
+                      content: Text("请确认是否退出登录"), // 主体内容
+                      // 在actions里就可以放置各种组件
+                      actions: [
+                        TextButton(onPressed: () async{
+                          // 确认后，清除Getx数据，删除token
+                          await tokenManager.removeToken(); // 删除持久化token
+                          // 传递空数据集给工厂函数处理，全部赋于null值，更新到Getx数据中，清空Getx数据
+                          _userController.updateUserInfo(UserInfo.fromJSON({})); 
+                          Navigator.pop(context); // 返回上个页面，取消弹窗
+                        }, child: Text("确认")),
+                        TextButton(onPressed: () {
+                          Navigator.pop(context); // 返回上个页面，取消弹窗
+                        }, child: Text("取消")),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: Text("退出", textAlign: TextAlign.end), // 设置文本为靠最后
+            ),
+          )
+        : Text("");
+  }
 
   Widget _buildHeader() {
     return Container(
@@ -75,6 +114,8 @@ class _MineViewState extends State<MineView> {
               ],
             ),
           ),
+          // 用Obx检测是否有用户登录，无则不显示，有则显示
+          Obx(() => _getLogin()),
         ],
       ),
     );

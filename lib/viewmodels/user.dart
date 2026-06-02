@@ -25,7 +25,7 @@ class UserInfo {
     required this.provinceCode,
     required this.token,
   });
-
+  // 一般工厂函数的Map就是用来传递数据给Getx的
   factory UserInfo.fromJSON(Map<String, dynamic> json) => UserInfo(
     account: json["account"] ?? "",
     avatar: json["avatar"] ?? "",

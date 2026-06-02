@@ -5,6 +5,7 @@ import 'package:hm_shop/api/user.dart';
 import 'package:hm_shop/stores/TokenManager.dart';
 import 'package:hm_shop/utils/ToastUtils.dart';
 import 'package:hm_shop/stores/UserController.dart';
+import 'package:hm_shop/utils/loginDialog.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key? key}) : super(key: key);
@@ -23,11 +24,11 @@ class _LoginPageState extends State<LoginPage> {
     return TextFormField(
       validator: (value) {
         // 判断不能为空
-        if(value == null || value.isEmpty) {
+        if (value == null || value.isEmpty) {
           return "手机号不能为空";
         }
         // 判断手机号格式
-        if(RegExp(r"^1[3-9]\d{8}").hasMatch(value) == false){
+        if (RegExp(r"^1[3-9]\d{8}").hasMatch(value) == false) {
           return "手机号格式不正确";
         }
         return null;
@@ -50,11 +51,11 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildCodeTextField() {
     return TextFormField(
       validator: (value) {
-        if(value == null || value.isEmpty) {
+        if (value == null || value.isEmpty) {
           return "密码不能为空";
         }
         // 密码校验，6-16的数字 字母 下划线组合
-        if(RegExp(r"^[a-zA-Z0-9_]{6,16}$").hasMatch(value) == false){
+        if (RegExp(r"^[a-zA-Z0-9_]{6,16}$").hasMatch(value) == false) {
           return "请输入6到16位的数字字母或下划线";
         }
         return null;
@@ -74,25 +75,29 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
-  
+
   // 定义登录跳转函数
-  _login() async{
+  _login() async {
     // 调用登录接口
     try {
+      // 登录进度动画启动
+      LoginDialog.show(context, message: "努力登录中");
       final res = await loginAPI({
         "account": _phonController.text, // 控制器获取数据的账号文本部分
         "password": _codeController.text, // 密码文本部分
       });
       // res // res就是用户信息合集
+      _userController.updateUserInfo(res);
       // 登录成功后写入持久化
       tokenManager.setToken(res.token);
-      _userController.updateUserInfo(res);
+      LoginDialog.hide(context); // 登录成功关闭进度动画
       Toastutils.showToast(context, "登录成功"); // 提示登录成功信息
       Navigator.pop(context); // 返回上个页面
     } catch (e) {
+      LoginDialog.hide(context); // 登录异常也关闭进度动画
       // 这一步做了很多操作，非常难，主要针对一层一层的异常抛出问题，异常抛出的信息问题
       // 对上几步的异常抛出信息不进行处理，保留原有信息
-      Toastutils.showToast(context, (e as DioException).message);// 提示登录失败信息
+      Toastutils.showToast(context, (e as DioException).message); // 提示登录失败信息
     }
   }
 
@@ -104,12 +109,12 @@ class _LoginPageState extends State<LoginPage> {
       child: ElevatedButton(
         onPressed: () {
           // 登录逻辑
-          if(_key.currentState!.validate() == true) {
+          if (_key.currentState!.validate() == true) {
             // 进行勾选框的判断
-            if(_isChecked == true) {
+            if (_isChecked == true) {
               // 校验通过
               _login();
-            }else{
+            } else {
               // 提示勾选用户协议
               Toastutils.showToast(context, "请勾选用户协议");
             }
@@ -182,7 +187,7 @@ class _LoginPageState extends State<LoginPage> {
       ],
     );
   }
-  
+
   // 创建globalkey控制From组件
   final GlobalKey<FormState> _key = GlobalKey<FormState>();
   @override
@@ -204,10 +209,10 @@ class _LoginPageState extends State<LoginPage> {
                 SizedBox(height: 20),
                 _buildHeader(), // 头部Widegt
                 SizedBox(height: 30),
-                _buildPhoneTextField(),// 账号Widget
-                SizedBox(height: 20), 
-                _buildCodeTextField(),// 密码Widget
-                SizedBox(height: 20), 
+                _buildPhoneTextField(), // 账号Widget
+                SizedBox(height: 20),
+                _buildCodeTextField(), // 密码Widget
+                SizedBox(height: 20),
                 _buildLoginButton(), // 登录按钮Widget
                 SizedBox(height: 20),
                 _buildCheckbox(), // 协议勾选Widget
