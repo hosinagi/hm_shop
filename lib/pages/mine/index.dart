@@ -4,6 +4,7 @@ import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/state_manager.dart';
 import 'package:hm_shop/api/mine.dart';
 import 'package:hm_shop/stores/TokenManager.dart';
+import 'package:hm_shop/utils/ToastUtils.dart';
 import 'package:hm_shop/viewmodels/home.dart';
 import 'package:hm_shop/viewmodels/user.dart';
 import 'package:hm_shop/widgets/Home/HmMoreList.dart';
@@ -37,16 +38,24 @@ class _MineViewState extends State<MineView> {
                       content: Text("请确认是否退出登录"), // 主体内容
                       // 在actions里就可以放置各种组件
                       actions: [
-                        TextButton(onPressed: () async{
-                          // 确认后，清除Getx数据，删除token
-                          await tokenManager.removeToken(); // 删除持久化token
-                          // 传递空数据集给工厂函数处理，全部赋于null值，更新到Getx数据中，清空Getx数据
-                          _userController.updateUserInfo(UserInfo.fromJSON({})); 
-                          Navigator.pop(context); // 返回上个页面，取消弹窗
-                        }, child: Text("确认")),
-                        TextButton(onPressed: () {
-                          Navigator.pop(context); // 返回上个页面，取消弹窗
-                        }, child: Text("取消")),
+                        TextButton(
+                          onPressed: () async {
+                            // 确认后，清除Getx数据，删除token
+                            await tokenManager.removeToken(); // 删除持久化token
+                            // 传递空数据集给工厂函数处理，全部赋于null值，更新到Getx数据中，清空Getx数据
+                            _userController.updateUserInfo(
+                              UserInfo.fromJSON({}),
+                            );
+                            Navigator.pop(context); // 返回上个页面，取消弹窗
+                          },
+                          child: Text("确认"),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context); // 返回上个页面，取消弹窗
+                          },
+                          child: Text("取消"),
+                        ),
                       ],
                     );
                   },
@@ -260,6 +269,14 @@ class _MineViewState extends State<MineView> {
     _registerEvent();
   }
 
+  // 释放控制器
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _controller.dispose();
+    super.dispose();
+  }
+
   // 滚动距离判断
   void _registerEvent() {
     // 滚动触发
@@ -281,19 +298,31 @@ class _MineViewState extends State<MineView> {
       // 有人正在加载或者没有下一页就不请求了
       return;
     }
-    _isLoading = true; // 占住位置
-    final res = await getGuessListAPI(_params);
-    _isLoading = false; // 解放位置
-    _list.addAll(res.items); // 把内容追加到尾部
-    // _list = res.items; // 这里不能赋值
-    setState(() {});
-    // 这个接口里有一个参数pages，res.pages表示数据一共有多少页
-    // 当请求的页面数大于等于总页面数就表示没有下一页
-    if (_params["page"] >= res.pages) {
-      _harMore = false;
-      return;
+    try {
+      _isLoading = true; // 占住位置
+      final res = await getGuessListAPI(_params);
+      _list.addAll(res.items); // 把内容追加到尾部
+      // _list = res.items; // 这里不能赋值
+      setState(() {});
+      // 这个接口里有一个参数pages，res.pages表示数据一共有多少页
+      // 当请求的页面数大于等于总页面数就表示没有下一页
+      if (_params["page"] >= res.pages) {
+        _harMore = false;
+        return;
+      }
+      _params["page"]++; // 针对页码进行++
+    } catch (_) {
+      if (mounted) {
+        Toastutils.showToast(context, "加载失败，请稍后重试");
+      }
+    } finally {
+      _isLoading = false; // 解放位置
     }
-    _params["page"]++; // 针对页码进行++
+
+    // 页面还存在，ui在构建才给刷新页面
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   // 滚动容器控制器

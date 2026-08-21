@@ -54,7 +54,7 @@ class _HmHotState extends State<HmHot> {
               ),
               SizedBox(height: 5),
               Text(
-                "¥${item.price}",
+                "¥${item.price.substring(0, item.price.length)}",
                 style: TextStyle(
                   fontSize: 12,
                   color: const Color.fromARGB(255, 86, 24, 20),
@@ -78,7 +78,7 @@ class _HmHotState extends State<HmHot> {
             fontWeight: FontWeight.w700,
           ),
         ),
-        SizedBox(width: 10),
+        SizedBox(width: 5),
         Text(
           widget.type == "step" ? "精心优选" : "最受欢迎",
           style: TextStyle(

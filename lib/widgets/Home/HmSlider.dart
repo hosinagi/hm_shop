@@ -14,13 +14,18 @@ class _HmSliderState extends State<HmSlider> {
   CarouselSliderController _controller = CarouselSliderController(); //控制轮播图跳转的控制器
   int _currentIndex = 0; //表示当前激活的导航灯
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   //轮播图组件封装到函数中
   Widget _getSlider() {
     // 在Flutter中获取屏幕宽度的方法
     final double screemWidth = MediaQuery.of(
       context,
     ).size.width; //这个context是这个Media Query自带的
-    //轮播图插件CarouselSlider
+    //官方轮播图插件CarouselSlider
     return CarouselSlider(
       carouselController: _controller, //绑定控制器
       items: List.generate(widget.BannerList.length, (int index) {
@@ -85,7 +90,7 @@ class _HmSliderState extends State<HmSlider> {
           children: List.generate(widget.BannerList.length, (int index) {
             return GestureDetector(
               onTap: () {
-                //跳转，index是导航灯的index，因为已经绑定了页面，所以使用方法使页面跳转到点击触发的index
+                //跳转，index是导航灯的index，这边一个_controller绑定了两个组件，所以使用方法使页面跳转到点击触发的index
                 _controller.animateToPage(index, duration: Duration(milliseconds: 300));
               },
               child: AnimatedContainer(

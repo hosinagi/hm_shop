@@ -2,7 +2,7 @@
 // 全局的常量
 class GlobalContants {
   static const String BASE_URL = "https://meikou-api.itheima.net"; // 基础地址
-  static const int TIME_OUT = 10; // 超时时间
+  static const Duration TIME_OUT = Duration(seconds: 10); // 超时时间
   static const String SUCCESS_CODE = "1"; // 业务状态/成功状态
   static const String TOKEN_KEY = "hm_shop_token"; // token对应持久化的key
 }

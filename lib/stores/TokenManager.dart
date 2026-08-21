@@ -21,7 +21,9 @@ class TokenManager {
     // 获取持久化实例,val就是token
     final prefs = await _getInstance();
     // 通过setString方法就可以将token写入持久化也就是磁盘上
-    prefs.setString(GlobalContants.TOKEN_KEY, val);
+    await prefs.setString(GlobalContants.TOKEN_KEY, val);
+    // 补充一点这里setString是异步的所以也需要等待其写入磁盘在去读Token
+    // 这样_token的值就不会是旧值
     _token = val;
   }
   // 获取token
@@ -31,7 +33,7 @@ class TokenManager {
   // 删除token
   Future<void> removeToken() async{
     final prefs = await _getInstance();
-    prefs.remove(GlobalContants.TOKEN_KEY); // 删除磁盘上的数据
+    await prefs.remove(GlobalContants.TOKEN_KEY); // 删除磁盘上的数据，remove也是异步
     _token = ""; // 磁盘删了，内存同步更新
   }
 }

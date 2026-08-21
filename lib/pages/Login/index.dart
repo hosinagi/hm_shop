@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hm_shop/api/user.dart';
 import 'package:hm_shop/stores/TokenManager.dart';
-import 'package:hm_shop/utils/ToastUtils.dart';
+import 'package:hm_shop/utils/Toastutils.dart';
 import 'package:hm_shop/stores/UserController.dart';
 import 'package:hm_shop/utils/loginDialog.dart';
 
@@ -18,6 +18,15 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController _phonController = TextEditingController(); // 账号控制器
   TextEditingController _codeController = TextEditingController(); // 密码控制器
   final Usercontroller _userController = Get.find(); // 寻找对象
+
+  // 释放一下控制器
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _phonController.dispose(); // 释放控制器
+    _codeController.dispose(); // 有几个控制器就释放几个
+    super.dispose(); // 调用父类dispose方法，Flutter正常释放其他组件
+  }
 
   // 用户账号Widget
   Widget _buildPhoneTextField() {
@@ -97,7 +106,12 @@ class _LoginPageState extends State<LoginPage> {
       LoginDialog.hide(context); // 登录异常也关闭进度动画
       // 这一步做了很多操作，非常难，主要针对一层一层的异常抛出问题，异常抛出的信息问题
       // 对上几步的异常抛出信息不进行处理，保留原有信息
-      Toastutils.showToast(context, (e as DioException).message); // 提示登录失败信息
+      if(e is DioException){
+        Toastutils.showToast(context, (e as DioException).message); // 提示登录失败信息
+      }
+      // 这里异常需要补充一下情况，不能单用DioException判断。
+      //断网是 SocketException、JSON 解析失败是 FormatException。
+      //类型不对e as 直接报错,用if判断一下类型
     }
   }
 

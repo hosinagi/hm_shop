@@ -105,33 +105,75 @@ class _HomeViewState extends State<HomeView> {
   // 所以不能直接使用，因为在build阶段这个函数还未构建完成执行没有结果
   // 需要使用Future.micoTask微任务使其异步完成
 
+  //释放滚动控制器，自己创建的控制器Flutter不会帮我们自动释放，需手动释放，否则内存泄漏
+  @override
+  void dispose() {
+    _controller.dispose(); // 调用dispose释放滚动控制器，有几个控制器就dispose几个。
+    super.dispose();       // 调用父类dispose方法，Flutter正常释放其他组件
+  }
+
   //获取分类数据
   Future<void> _getCategoryList() async {
-    _CategoryList = await getCategoryListAPI();
+    try {
+      final list = await getCategoryListAPI();
+      if (!mounted) return;
+      _CategoryList = list; // 这句的意思是当页面不存在了，就直接停止避免报错
+      setState(() {});
+    } catch (_) {
+      // 首页单块加载失败时，可以静默忽略，或提示用户
+    }
     setState(() {});
   }
 
   //获取轮播图数据
   Future<void> _getBannerList() async {
-    _BannerList = await getBannerListAPI();
-    setState(() {});
+    try {
+      final list = await getBannerListAPI();
+      if (!mounted) return; // 这句的意思是当页面不存在了，就直接停止避免报错
+      setState(() {
+        _BannerList = list;
+      });
+    } catch (_) {
+      // 首页单块加载失败时，可以静默忽略，或提示用户
+    }
   }
 
   //获取优惠推荐数据
   Future<void> _getSpecialRecommendList() async {
-    _SpecialRecommendList = await getSpecialRecommendListAPI();
+    try {
+      final list = await getSpecialRecommendListAPI();
+      if (!mounted) return;
+      _SpecialRecommendList = list;
+      setState(() {});
+    } catch (_) {
+      // 首页单块加载失败时，可以静默忽略，或提示用户
+    }
     setState(() {});
   }
 
   //获取热榜推荐数据
   Future<void> _getInVogueList() async {
-    _inVogueResult = await getInVogueListAPI();
+    try {
+      final result = await getInVogueListAPI();
+      if (!mounted) return;
+      _inVogueResult = result;
+      setState(() {});
+    } catch (_) {
+      // 首页单块加载失败时，可以静默忽略，或提示用户
+    }
     setState(() {});
   }
 
   //获取一战式买全数据
   Future<void> _getOneStopList() async {
-    _oneStopResult = await getOneStopListAPI();
+    try {
+      final result = await getOneStopListAPI();
+      if (!mounted) return;
+      _oneStopResult = result;
+      setState(() {});
+    } catch (_) {
+      // 首页单块加载失败时，可以静默忽略，或提示用户
+    }
     setState(() {});
   }
 
@@ -146,17 +188,30 @@ class _HomeViewState extends State<HomeView> {
       return;
     }
     _isLoading = true; // 占住位置，表示请求进行中
-    int requestLimit = _page * 10;
-    _recommendList = await getRecommendListAPI({"limit": requestLimit});
-    _isLoading = false; // 松开位置，表示请求结束
-    setState(() {});
-    // 要10条请求给10条就进行下一次请求
-    // 当要10条给不满10条则表示，数据已用光
-    if (_recommendList.length > requestLimit) {
-      _hasMore = false;
-      return;
+    try {
+      // 这里用try，catch是因为要进行防错处理，防止异步请求结果发回已销毁的流程
+      int requestLimit = _page * 10;
+      _recommendList = await getRecommendListAPI({"limit": requestLimit});
+      // 要10条请求给10条就进行下一次请求
+      // 当要10条给不满10条则表示，数据已用光
+      if (_recommendList.length < requestLimit) {
+        _hasMore = false;
+      } else {
+        _page++; // 请求完成页码加一
+      }
+    } catch (_) {
+      // 页面还在才提示,这里是做了一个widget组件在ui运行过程意外被中止，但是异步结果仍然返回的防错
+      if (mounted) {
+        Toastutils.showToast(context, "加载失败，请稍后重试");
+      }
+    } finally {
+      // 不管成功还是失败，都恢复加载状态
+      _isLoading = false;
     }
-    _page++; // 请求完成页码加一
+    // 页面存在才刷新 UI
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   // 监听滚动到底部的事件
@@ -179,18 +234,27 @@ class _HomeViewState extends State<HomeView> {
   // 封装onRefresh函数，实现下拉重置数据
   Future<void> _onRefresh() async {
     // 参数回归
+    // 这里不能是bool _isLoading,因为Dart 的规则是：如果局部变量和成员变量同名，函数内部优先找局部变量。
     _page = 1;
-    bool _isLoading = false;
-    bool _hasMore = true;
-    // 重新获取数据
-    await _getBannerList();
-    await _getCategoryList();
-    await _getSpecialRecommendList();
-    await _getInVogueList();
-    await _getOneStopList();
-    await _getRecommendList();
-    // 数据获取成功，显示提示消息
-    Toastutils.showToast(context, "刷新成功");
+    _isLoading = false;
+    _hasMore = true;
+    try {
+      await _getBannerList();
+      await _getCategoryList();
+      await _getSpecialRecommendList();
+      await _getInVogueList();
+      await _getOneStopList();
+      await _getRecommendList();
+
+      if (mounted) {
+        // 页面存在再去刷新和提示刷新成功
+        Toastutils.showToast(context, "刷新成功");
+      }
+    } catch (_) {
+      if (mounted) {
+        Toastutils.showToast(context, "刷新失败，请检查网络");
+      }
+    }
   }
 
   // Globalkey是一个方法可以创建一个key绑定到Widget部件上，可以操作widget部件

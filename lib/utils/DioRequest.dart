@@ -4,20 +4,14 @@ import 'package:hm_shop/constants/index.dart';
 import 'package:hm_shop/stores/TokenManager.dart';
 
 class DioRequest {
-  // 创建Dio对象，接下来的请求，拦截，设置全在这里面完成
+  // 创建Dio对象，接下来的请求，拦截器设置全在这里面完成
   final _dio = Dio();
   // 在构造函数里写入基础地址，超时时间，拦截器
   DioRequest() {
     _dio.options.baseUrl = GlobalContants.BASE_URL; // 配置基础地址
-    _dio.options.connectTimeout = Duration(
-      seconds: GlobalContants.TIME_OUT,
-    ); // 请求超时
-    //_dio.options.sendTimeout = Duration(
-      //seconds: GlobalContants.TIME_OUT,
-    //); // 发送超时
-    _dio.options.receiveTimeout = Duration(
-      seconds: GlobalContants.TIME_OUT,
-    ); // 接收超时
+    _dio.options.connectTimeout = GlobalContants.TIME_OUT; // 请求超时
+    _dio.options.sendTimeout = GlobalContants.TIME_OUT; // 发送超时
+    _dio.options.receiveTimeout = GlobalContants.TIME_OUT; // 接收超时
     //拦截器
     _addInterceptor();
   }
@@ -27,23 +21,22 @@ class DioRequest {
     // 这样就是定义拦截器的步骤
     _dio.interceptors.add(
       InterceptorsWrapper(
-        //响应拦截
+        //请求拦截
         onRequest: (request, handler) {
           // 一般在这里注入token，用gettoken工具获取磁盘上的数据
           // 判断磁盘中有数据才进行获取操作
-          if(tokenManager.getToken().isNotEmpty) {
+          final token = tokenManager.getToken();
+          if (token.isNotEmpty) {
             // 一般使用request中的headers Authorazation Bearer token来获取token，这种是企业公式的写法
-            request.headers = {
-              "Authorization": "Bearer ${tokenManager.getToken()}" 
-            };
+            request.headers["Authorization"] = "Bearer $token";
           }
           handler.next(request); //通过
         },
-        //请求拦截
+        //响应拦截
         onResponse: (response, handler) {
           //进行http状态码判断大于200且小于300则成功
           //response.statusCode为http状态码，可能为空
-          if (response.statusCode! >= 200 && response.statusCode! <= 300) {
+          if (response.statusCode! >= 200 && response.statusCode! < 300) {
             handler.next(response);
             return;
           }
@@ -51,14 +44,36 @@ class DioRequest {
           handler.reject(DioException(requestOptions: response.requestOptions));
         },
         //错误拦截
-        onError: (error, handler) {
-          // handler.reject(error); //有错误就拦截
-          // 原来的异常抛出没有携带信息，改变方法使其能携带信息
-          handler.reject(DioException(requestOptions: error.requestOptions,
-          message: error.response?.data["msg"] ?? " "));
+        // handler.reject(error); //有错误就拦截
+        // 原来的异常抛出没有携带信息，改变方法使其能携带信息
+        onError: (DioException error, ErrorInterceptorHandler handler) {
+          // 断网、超时时 error.response 可能为 null，
+          // data 也可能是 String/List 而不是 Map，需要安全取值，
+          // 避免在异常处理里再次抛异常。
+          handler.next(
+            DioException(
+              requestOptions: error.requestOptions,
+              response: error.response,
+              type: error.type,
+              error: error.error,
+              message: _readErrorMessage(error),
+            ),
+          );
         },
       ),
     );
+  }
+
+  // 从错误响应中安全读取后端返回的 msg
+  String _readErrorMessage(DioException error) {
+    final data = error.response?.data;
+    if (data is Map) {
+      final msg = data["msg"];
+      if (msg != null && msg.toString().isNotEmpty) {
+        return msg.toString();
+      }
+    }
+    return "网络请求失败，请稍后重试";
   }
 
   // 定义一个get方法，请求数据
@@ -84,11 +99,13 @@ class DioRequest {
       }
       // 判断为else则抛出异常
       // throw Exception(data["msg"] ?? "加载出现异常"); // ??空判断
-      throw DioException(requestOptions: res.requestOptions,
-      message: data["msg"] ?? "数据加载异常");
+      throw DioException(
+        requestOptions: res.requestOptions,
+        message: data["msg"] ?? "数据加载异常",
+      );
     } catch (e) {
       // throw Exception(e);用这个方法会覆盖掉信息
-      rethrow;  // 不改变原来抛出异常的类型
+      rethrow; // 不改变原来抛出异常的类型
     }
   }
 
@@ -97,7 +114,6 @@ class DioRequest {
 
 // 创建对象,方便外部调用
 final DioRequest dioRequest = DioRequest(); // 单例对象
-
 
 // dio请求工具发送请求，返回的数据类型却是Response<dynamic>，需要的数据存在Response<dynamic>.data中
 // 为了不用每次获取数据都需要data，所有要把所有的接口解放出来，也就是解构或者对数据的二次处理

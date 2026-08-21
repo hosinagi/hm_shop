@@ -76,7 +76,8 @@ class _MainPageState extends State<MainPage> {
 
   final Usercontroller _usercontroller = Get.put(Usercontroller());
   _initUser() async {
-    await tokenManager.init(); // 先初始化token，获取一下，看一下有没有，否则一直为空。
+    // 原步骤的初始化await tokenManager.init()已经放在最前面，runApp之前，先读取token在运行整体。
+    // token 已经在 main() 里初始化过了，这里直接读取
     if (tokenManager.getToken().isNotEmpty) {
       // 如果token有值则获取用户信息赋值给Getx
       _usercontroller.updateUserInfo(await getuserinfoAPI());

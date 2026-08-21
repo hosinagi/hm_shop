@@ -98,7 +98,7 @@ class _HmSuggestionState extends State<HmSuggestion> {
                 color: const Color.fromARGB(255, 237, 100, 90),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Text("￥${list[index].price}", style: TextStyle(fontSize: 13)),
+              child: Text("￥${list[index].price.substring(0, list[index].price.length)}", style: TextStyle(fontSize: 13)),
             ),
           ],
         ),
